@@ -1,6 +1,11 @@
-//package main.java;
+import org.checkerframework.checker.nullness.Opt;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static java.util.Collections.reverseOrder;
 
 public class Game {
     public PokerVariantInterface getVariant() {
@@ -13,7 +18,7 @@ public class Game {
 
     private PokerVariantInterface variant;
     private GameType gameType;
-    private Card[] board;
+    private Optional<Card[]> board;
     private ArrayList<Player> players;
 
     public Game() {
@@ -24,11 +29,11 @@ public class Game {
         return gameType;
     }
 
-    public Card[] getBoard() {
+    public Optional<Card[]> getBoard() {
         return board;
     }
 
-    public void setBoard(Card[] board) {
+    public void setBoard(Optional<Card[]> board) {
         this.board = board;
     }
 
@@ -42,5 +47,23 @@ public class Game {
 
     public ArrayList<Player> getPlayers() {
         return players;
+    }
+
+    public String giveResult(){
+        List<Map.Entry<Player, Hand>> handsList = players.stream().map((player) -> Map.entry(player, variant.findBestHand(board, player.getStartingHand()))).toList();
+//        System.out.println(handsList.get(0).compareTo(handsList.get(1)));
+        List<Map.Entry<Player, Hand>> entries = handsList.stream().sorted(Map.Entry.comparingByValue(Hand::compareTo)).toList();
+//        System.out.println("dupa");
+//        entries.forEach(System.out::println);
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < entries.size() - 1; ++i){
+            sb.append(entries.get(i).getKey().getTextStartingHand());
+            if (entries.get(i).getValue().compareTo(entries.get(i+1).getValue()) < 0)
+                sb.append(" ");
+            else
+                sb.append("=");
+        }
+        sb.append(entries.get(entries.size() - 1).getKey().getTextStartingHand());
+        return sb.toString();
     }
 }

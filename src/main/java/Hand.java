@@ -41,6 +41,7 @@ public class Hand implements Comparable<Hand> {
 
     @Override
     public int compareTo(Hand hand) {
+//        System.out.println("AAAAAAAAA");
         return Comparator.comparing(Hand::getHandType).thenComparing((o1, o2) -> {
             Card[] cards1 = o1.getCards();
             Card[] cards2 = o2.getCards();
@@ -50,6 +51,6 @@ public class Hand implements Comparable<Hand> {
             }
             return 0;
         }
-        ).compare(this, hand);
+        ).compare(hand, this);
     }
 }

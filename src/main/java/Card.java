@@ -49,6 +49,6 @@ public class Card implements Comparable<Card> {
 
     @Override
     public int compareTo(Card card) {
-        return Comparator.comparing(Card::getRank).compare(this, card);
+        return Comparator.comparing(Card::getRank).reversed().compare(this, card);
     }
 }
