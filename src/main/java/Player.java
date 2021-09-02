@@ -1,6 +1,6 @@
 import java.util.Arrays;
 
-public class Player {
+public class Player implements Comparable<Player> {
     private Card[] bestHand;
 
     public Card[] getStartingHand() {
@@ -30,5 +30,10 @@ public class Player {
         return "Player{" +
                 "startingHand=" + Arrays.toString(startingHand) +
                 '}';
+    }
+
+    @Override
+    public int compareTo(Player o) {
+        return this.textStartingHand.compareTo(o.getTextStartingHand());
     }
 }

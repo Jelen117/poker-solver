@@ -1,8 +1,7 @@
 //import one.util.streamex.StreamEx;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.stream.Stream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.collect.Sets.cartesianProduct;
 import static java.util.Map.entry;
@@ -43,6 +42,19 @@ public class Parser {
             entry(GameType.Draw, new FiveCardDrawPokerVariant())
     );
 
+    private static final String gamesRegex = "texas-holdem|omaha-holdem|five-card-draw";
+    private static final String cardRegex = "(([AKQJT]|[2-9])[hcsd])";
+    private static final String boardRegex = cardRegex + "{5}";
+    private static final String texasHoldemHandsRegex = "(" + cardRegex + "{2}\\s?)*";
+    private static final String omahaHoldemHandsRegex = "(" + cardRegex + "{4}\\s?)*";
+    private static final String fiveCardDrawHandsRegex = "(" + cardRegex + "{5}\\s?)*";
+
+    private static final Map<GameType, String> regexesMap = Map.ofEntries(
+            entry(GameType.Holdem, texasHoldemHandsRegex),
+            entry(GameType.Omaha, omahaHoldemHandsRegex),
+            entry(GameType.Draw, fiveCardDrawHandsRegex)
+    );
+
     public static Card[] parseCardsInput(String text){
         int textLength = text.length();
         Card[] hand = new Card[textLength/2];
@@ -60,25 +72,39 @@ public class Parser {
 
     public static ArrayList<Game> parseInput() {
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Game> games = new ArrayList<>();
         while (scanner.hasNextLine()){
+            String[] line = scanner.nextLine().split(" ");
             Game game = new Game();
             String[] hands;
-            String[] line = scanner.nextLine().split(" ");
-            game.setGameType(gameTypesMap.get(line[0]));
+            if (line[0].matches(gamesRegex))
+                game.setGameType(gameTypesMap.get(line[0]));
+            else {
+                System.out.println("Invalid game type. Game format: " + gamesRegex);
+                continue;
+            }
             if (game.getGameType() != GameType.Draw) {
-                game.setBoard(Optional.of(parseCardsInput(line[1])));
+                if (line[1].matches(boardRegex))
+                    game.setBoard(Optional.of(parseCardsInput(line[1])));
+                else {
+                    System.out.println("Invalid board. Board format: " + boardRegex);
+                    continue;
+                }
                 hands = Arrays.copyOfRange(line, 2, line.length);
             }
             else {
                 game.setBoard(Optional.empty());
                 hands = Arrays.copyOfRange(line, 1, line.length);
             }
-            Arrays.stream(hands).forEach((hand) -> game.addPlayer(new Player(hand, parseCardsInput(hand))));
+            if (String.join(" ", hands).matches(regexesMap.get(game.getGameType())))
+                Arrays.stream(hands).forEach((hand) -> game.addPlayer(new Player(hand, parseCardsInput(hand))));
+            else {
+                System.out.println("Invalid hands format. Hands format: " + regexesMap.get(game.getGameType()));
+                continue;
+            }
             game.setVariant(variantsMap.get(game.getGameType()));
-            games.add(game);
+            System.out.println(game.giveResult());
         }
-        return games;
+        return null;
     }
 
     public static void toString(ArrayList<Game> games){

@@ -53,8 +53,10 @@ public class Game {
         List<Map.Entry<Player, Hand>> handsList = players.stream().map((player) -> Map.entry(player, variant.findBestHand(board, player.getStartingHand()))).toList();
 //        System.out.println(handsList.get(0).compareTo(handsList.get(1)));
         List<Map.Entry<Player, Hand>> entries = handsList.stream().sorted(Map.Entry.comparingByValue(Hand::compareTo)).toList();
-//        System.out.println("dupa");
+        entries = sortEqualHandsAlphabetically(entries);
+//        System.out.println("1");
 //        entries.forEach(System.out::println);
+//        System.out.println("2");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < entries.size() - 1; ++i){
             sb.append(entries.get(i).getKey().getTextStartingHand());
@@ -65,5 +67,23 @@ public class Game {
         }
         sb.append(entries.get(entries.size() - 1).getKey().getTextStartingHand());
         return sb.toString();
+//        return null;
+    }
+
+    private static List<Map.Entry<Player, Hand>> sortEqualHandsAlphabetically (List<Map.Entry<Player, Hand>> entries){
+        List<Map.Entry<Player, Hand>> sorted = new ArrayList<>();
+        for (int i = 0; i < entries.size() - 1; ++i){
+            if (entries.get(i).getValue().compareTo(entries.get(i+1).getValue()) == 0) {
+                int start = i;
+                while (entries.get(i).getValue().compareTo(entries.get(i+1).getValue()) == 0){
+                    ++i;
+                }
+                sorted.addAll(entries.subList(start, i + 1).stream().sorted(Map.Entry.comparingByKey(Player::compareTo)).toList());
+            }
+            else
+                sorted.add(entries.get(i));
+        }
+        sorted.add(entries.get(entries.size() - 1));
+        return sorted;
     }
 }

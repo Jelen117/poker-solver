@@ -37,9 +37,8 @@ public interface PokerVariantInterface {
         List<Card> straightLists = composition.stream()
                 .collect(StraightCollector.splitCards()).stream()
                 .toList();
-        if (straightLists.size() >= 5){
+        if (straightLists.size() >= 5)
             return Optional.of(new Hand(HandType.Straight, straightLists.toArray(new Card[5])));
-        }
         return Optional.empty();
     }
 
@@ -73,9 +72,8 @@ public interface PokerVariantInterface {
         Hand bestHand = new Hand(HandType.HighCard, composition.subList(0, 5).toArray(new Card[0]));
         for (Set<Card> set : combinations){
             Hand res = findHand(set.stream().sorted(Card::compareTo).toList());
-            if (bestHand.compareTo(res) < 0){
+            if (bestHand.compareTo(res) < 0)
                 bestHand = res;
-            }
         }
         return bestHand;
     }

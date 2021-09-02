@@ -17,7 +17,9 @@ public class OmahaHoldemPokerVariant implements PokerVariantInterface {
         Set<Set<Card>> combinations2 = combinations(Sets.newHashSet(hand), 2);
         Set<List<Set<Card>>> lista = cartesianProduct(combinations1, combinations2);
         for (List<Set<Card>> s : lista){
-            List<Card> hand1 = Sets.newHashSet(Iterables.concat(s)).stream().sorted(Card::compareTo).collect(StraightCollector.splitCards());
+            List<Card> hand1 = Sets.newHashSet(Iterables.concat(s)).stream()
+                    .sorted(Card::compareTo)
+                    .collect(StraightCollector.splitCards());
             if (hand1.size() == 5){
                 return Optional.of(new Hand(HandType.Straight, hand1.toArray(Card[]::new)));
             }
@@ -32,11 +34,9 @@ public class OmahaHoldemPokerVariant implements PokerVariantInterface {
         Set<Set<Card>> combinations2 = combinations(Sets.newHashSet(hand), 2);
         Set<List<Set<Card>>> lista = cartesianProduct(combinations1, combinations2);
         for (List<Set<Card>> s : lista){
-            Map<Rank, Long> Hand = Sets.newHashSet(Iterables.concat(s)).
-                    stream().
-                    sorted(Card::compareTo).
-                    collect(Collectors.groupingBy(Card::getRank, Collectors.counting()));
-//                    .forEach((key, value) -> System.out.println(key + ": " + value));
+            Map<Rank, Long> Hand = Sets.newHashSet(Iterables.concat(s)).stream()
+                    .sorted(Card::compareTo)
+                    .collect(Collectors.groupingBy(Card::getRank, Collectors.counting()));
             if (Hand.size() == 5){
                 System.out.println("STREET");
                 System.out.println(Hand);
