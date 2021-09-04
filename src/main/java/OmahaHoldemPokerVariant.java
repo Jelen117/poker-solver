@@ -36,7 +36,7 @@ public class OmahaHoldemPokerVariant implements PokerVariantInterface {
                     .sorted(Card::compareTo)
                     .collect(StraightCollector.splitCards());
             if (hand1.size() >= 5){
-                return Optional.of(new Hand(HandType.Straight, hand1.subList(0,5).toArray(Card[]::new)));
+                return Optional.of(new Hand(HandType.Straight, hand1.subList(0, 5).toArray(Card[]::new)));
             }
         }
         return Optional.empty();

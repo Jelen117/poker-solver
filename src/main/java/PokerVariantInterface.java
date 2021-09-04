@@ -12,13 +12,6 @@ import static one.util.streamex.MoreCollectors.maxAll;
 
 public interface PokerVariantInterface {
 
-    default Optional<Hand> findStraightFlushAndFlush(Card[] board, Card[] hand) {
-        List<Card> composition = Stream.concat(Arrays.stream(board), Arrays.stream(hand))
-                .sorted(Card::compareTo)
-                .toList();
-        return findStraightFlushAndFlush(composition);
-    }
-
     static Optional<Hand> findStraightFlushAndFlush(List<Card> composition){
         Map.Entry<Color, Long> maxColor = composition.stream()
                 .collect(Collectors.groupingBy(Card::getColor, Collectors.counting()))
@@ -39,6 +32,13 @@ public interface PokerVariantInterface {
             return Optional.of(new Hand(HandType.Flush, flushCards.subList(0,5).toArray(new Card[5])));
         }
         return Optional.empty();
+    }
+
+    default Optional<Hand> findStraightFlushAndFlush(Card[] board, Card[] hand) {
+        List<Card> composition = Stream.concat(Arrays.stream(board), Arrays.stream(hand))
+                .sorted(Card::compareTo)
+                .toList();
+        return findStraightFlushAndFlush(composition);
     }
 
     static Optional<Hand> findStraight(List<Card> composition){
@@ -112,7 +112,10 @@ public interface PokerVariantInterface {
             composition = Stream.concat(Arrays.stream(board.get()), Arrays.stream(hand)).sorted(Card::compareTo).toList();
         else composition = Arrays.stream(hand).sorted(Card::compareTo).toList();
         Hand bestHand = findHighCard(composition);
-        Optional<Hand> hand1 = findStraightFlushAndFlush(composition);
+        Optional<Hand> hand1;
+        if (board.isPresent())
+            hand1 =  findStraightFlushAndFlush(board.get(), hand);
+        else hand1 =  findStraightFlushAndFlush(composition);
         if (hand1.isPresent() && bestHand.compareTo(hand1.get()) < 0) {
             bestHand = hand1.get();
         }
@@ -131,7 +134,6 @@ public interface PokerVariantInterface {
         if (bestHand.compareTo(hand3) < 0) {
             bestHand = hand3;
         }
-//        System.out.println(bestHand);
         return bestHand;
     }
 }
