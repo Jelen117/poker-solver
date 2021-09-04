@@ -1,3 +1,7 @@
+package collectors;
+
+import model.Card;
+
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
