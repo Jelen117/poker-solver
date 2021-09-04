@@ -12,7 +12,14 @@ import static one.util.streamex.MoreCollectors.maxAll;
 
 public interface PokerVariantInterface {
 
-    default Optional<Hand> findStraightFlushAndFlush(List<Card> composition){
+    default Optional<Hand> findStraightFlushAndFlush(Card[] board, Card[] hand) {
+        List<Card> composition = Stream.concat(Arrays.stream(board), Arrays.stream(hand))
+                .sorted(Card::compareTo)
+                .toList();
+        return findStraightFlushAndFlush(composition);
+    }
+
+    static Optional<Hand> findStraightFlushAndFlush(List<Card> composition){
         Map.Entry<Color, Long> maxColor = composition.stream()
                 .collect(Collectors.groupingBy(Card::getColor, Collectors.counting()))
                 .entrySet()
@@ -34,7 +41,7 @@ public interface PokerVariantInterface {
         return Optional.empty();
     }
 
-    default Optional<Hand> findStraight(List<Card> composition){
+    static Optional<Hand> findStraight(List<Card> composition){
         List<Card> filtered = new ArrayList<>(composition);
 //        List<Card> filtered = composition.stream().filter(card -> card.getRank() == Rank.Ace).map(card -> new Card(card.getColor(), Rank.AceLow)).toList();
                 filtered.addAll(composition.stream().filter(card -> card.getRank() == Rank.Ace).map(card -> new Card(card.getColor(), Rank.AceLow)).toList());
@@ -63,7 +70,6 @@ public interface PokerVariantInterface {
                 .collect(Collectors.groupingBy(Card::getRank, Collectors.counting()));
         List<Map.Entry<Rank, Long>> sorted = map.entrySet().stream().sorted(reverseOrder(Map.Entry.comparingByKey())).sorted(reverseOrder(Map.Entry.comparingByValue())).toList();
         List<Card> sortedList = new ArrayList<>();
-//        sorted.stream().filter(card -> card.getRank() == r)
         for (Map.Entry<Rank, Long> rankLongEntry : sorted) {
             Rank r = rankLongEntry.getKey();
             sortedList.addAll(list.stream().filter(card -> card.getRank() == r).toList());
@@ -110,14 +116,22 @@ public interface PokerVariantInterface {
         if (hand1.isPresent() && bestHand.compareTo(hand1.get()) < 0) {
             bestHand = hand1.get();
         }
-        hand1 = findStraight(composition);
+        if (board.isPresent())
+            hand1 = findStraight(board.get(), hand);
+        else hand1 = findStraight(composition);
+//        hand1 = findStraight(composition);
         if (hand1.isPresent() && bestHand.compareTo(hand1.get()) < 0) {
             bestHand = hand1.get();
         }
-        Hand hand3 = findGroups(composition);
+        Hand hand3;
+        if (board.isPresent())
+            hand3 = findGroups(board.get(), hand);
+        else hand3 = findGroups(composition);
+//        System.out.println(hand3);
         if (bestHand.compareTo(hand3) < 0) {
             bestHand = hand3;
         }
+//        System.out.println(bestHand);
         return bestHand;
     }
 }

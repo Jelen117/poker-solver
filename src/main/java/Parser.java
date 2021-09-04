@@ -110,11 +110,8 @@ public class Parser {
     public static void toString(ArrayList<Game> games){
         for (Game game : games){
             System.out.println(game.getGameType());
-//            System.out.println(Arrays.toString(
             if (game.getBoard().isPresent())
                 System.out.println(Arrays.toString(game.getBoard().get()));
-//                    game.getBoard().ifPresent(()System.out::println);
-//                    c.ifPresent(c -> System.out.println(c.get()));
             for (Player player : game.getPlayers()){
                 System.out.println(player.toString());
             }
