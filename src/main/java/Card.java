@@ -3,9 +3,14 @@ import java.util.Comparator;
 public class Card implements Comparable<Card> {
     private Color color;
     private Rank rank;
-    private String textCard;
 
-    private CardOrigin cardOrigin;
+    public Card(Color color, Rank rank) {
+        this.color = color;
+        this.rank = rank;
+    }
+
+    public Card() {
+    }
 
     public Color getColor() {
         return color;
@@ -21,22 +26,6 @@ public class Card implements Comparable<Card> {
 
     public void setRank(Rank rank) {
         this.rank = rank;
-    }
-
-    public String getTextCard() {
-        return textCard;
-    }
-
-    public void setTextCard(String textCard) {
-        this.textCard = textCard;
-    }
-
-    public CardOrigin getCardOrigin() {
-        return cardOrigin;
-    }
-
-    public void setCardOrigin(CardOrigin cardOrigin) {
-        this.cardOrigin = cardOrigin;
     }
 
     @Override

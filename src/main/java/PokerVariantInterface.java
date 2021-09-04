@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Sets.combinations;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.reverseOrder;
+import static java.util.Collections.sort;
 import static one.util.streamex.MoreCollectors.maxAll;
 
 public interface PokerVariantInterface {
@@ -34,11 +35,19 @@ public interface PokerVariantInterface {
     }
 
     default Optional<Hand> findStraight(List<Card> composition){
-        List<Card> straightLists = composition.stream()
+        List<Card> filtered = new ArrayList<>(composition);
+//        List<Card> filtered = composition.stream().filter(card -> card.getRank() == Rank.Ace).map(card -> new Card(card.getColor(), Rank.AceLow)).toList();
+                filtered.addAll(composition.stream().filter(card -> card.getRank() == Rank.Ace).map(card -> new Card(card.getColor(), Rank.AceLow)).toList());
+//        composition.addAll(filtered);
+//        if(filtered.stream().filter(card -> card.getRank() == Rank.Ace).toList().size() > 0)
+//            filtered.forEach(System.out::println);
+        List<Card> straightLists = filtered.stream()
                 .collect(StraightCollector.splitCards()).stream()
                 .toList();
+//        System.out.println("eee");
+//        System.out.println(straightLists);
         if (straightLists.size() >= 5)
-            return Optional.of(new Hand(HandType.Straight, straightLists.toArray(new Card[5])));
+            return Optional.of(new Hand(HandType.Straight, straightLists.subList(0, 5).toArray(new Card[5])));
         return Optional.empty();
     }
 
@@ -50,21 +59,25 @@ public interface PokerVariantInterface {
     }
 
     static Hand findHand(List<Card> list){
-        List<Long> values = list.stream()
-                .collect(Collectors.groupingBy(Card::getRank, Collectors.counting()))
-                .values().stream()
-                .sorted(reverseOrder())
-                .toList();
-        if (values.get(0) == 4L) return new Hand(HandType.Quad, list.toArray(new Card[5]));
-        if (values.get(0) == 3L){
-            if (values.get(1) == 2L) return new Hand(HandType.FullHouse, list.toArray(new Card[5]));
-            else return new Hand(HandType.Set, list.toArray(new Card[5]));
+        Map<Rank, Long> map = list.stream()
+                .collect(Collectors.groupingBy(Card::getRank, Collectors.counting()));
+        List<Map.Entry<Rank, Long>> sorted = map.entrySet().stream().sorted(reverseOrder(Map.Entry.comparingByKey())).sorted(reverseOrder(Map.Entry.comparingByValue())).toList();
+        List<Card> sortedList = new ArrayList<>();
+//        sorted.stream().filter(card -> card.getRank() == r)
+        for (Map.Entry<Rank, Long> rankLongEntry : sorted) {
+            Rank r = rankLongEntry.getKey();
+            sortedList.addAll(list.stream().filter(card -> card.getRank() == r).toList());
         }
-        if (values.get(0) == 2L){
-            if (values.get(1) == 2L) return new Hand(HandType.TwoPairs, list.toArray(new Card[5]));
-            else return new Hand(HandType.Pair, list.toArray(new Card[5]));
+        if (sorted.get(0).getValue() == 4L) return new Hand(HandType.Quad, sortedList.toArray(new Card[5]));
+        if (sorted.get(0).getValue() == 3L){
+            if (sorted.get(1).getValue() == 2L) return new Hand(HandType.FullHouse, sortedList.toArray(new Card[5]));
+            else return new Hand(HandType.Set, sortedList.toArray(new Card[5]));
         }
-        return new Hand(HandType.HighCard, list.toArray(new Card[5]));
+        if (sorted.get(0).getValue() == 2L){
+            if (sorted.get(1).getValue() == 2L) return new Hand(HandType.TwoPairs, sortedList.toArray(new Card[5]));
+            else return new Hand(HandType.Pair, sortedList.toArray(new Card[5]));
+        }
+        return new Hand(HandType.HighCard, sortedList.toArray(new Card[5]));
     }
 
     default Hand findGroups(List<Card> composition){
@@ -97,23 +110,14 @@ public interface PokerVariantInterface {
         if (hand1.isPresent() && bestHand.compareTo(hand1.get()) < 0) {
             bestHand = hand1.get();
         }
-//        System.out.println(bestHand);
-        Optional<Hand> hand2 = findStraight(composition);
-//        System.out.println("hand2");
-//        System.out.println(hand2);
-        if (hand2.isPresent() && bestHand.compareTo(hand2.get()) < 0) {
-            bestHand = hand2.get();
+        hand1 = findStraight(composition);
+        if (hand1.isPresent() && bestHand.compareTo(hand1.get()) < 0) {
+            bestHand = hand1.get();
         }
-//        System.out.println(bestHand);
-//        System.out.println("bestHand3");
         Hand hand3 = findGroups(composition);
-//        System.out.println("hand3");
-//        System.out.println(hand3);
         if (bestHand.compareTo(hand3) < 0) {
             bestHand = hand3;
         }
-//        System.out.println(bestHand);
-
         return bestHand;
     }
 }

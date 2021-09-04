@@ -75,15 +75,15 @@ public class Game {
         for (int i = 0; i < entries.size() - 1; ++i){
             if (entries.get(i).getValue().compareTo(entries.get(i+1).getValue()) == 0) {
                 int start = i;
-                while (entries.get(i).getValue().compareTo(entries.get(i+1).getValue()) == 0){
+                while (i < entries.size() - 1 && entries.get(i).getValue().compareTo(entries.get(i+1).getValue()) == 0)
                     ++i;
-                }
                 sorted.addAll(entries.subList(start, i + 1).stream().sorted(Map.Entry.comparingByKey(Player::compareTo)).toList());
             }
             else
                 sorted.add(entries.get(i));
         }
-        sorted.add(entries.get(entries.size() - 1));
+        if (entries.size() == sorted.size() + 1)
+            sorted.add(entries.get(entries.size() - 1));
         return sorted;
     }
 }
